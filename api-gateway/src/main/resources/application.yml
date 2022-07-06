@@ -11,10 +11,20 @@ eureka:
 spring:
   application:
     name: api-gateway
-#  cloud:
-#    gateway:
-#      routes:
-#        - id : user-service
-#          uri: http://127.0.0.1:8081
-#          predicates:
-#            - Path=/user-service/**
+  cloud:
+    gateway:
+      routes:
+        - id : user-service
+          uri: http://127.0.0.1:8081
+          predicates:
+            - Path=/user-service/**
+          filters:
+            - AddRequestHeader=user-request, user-request-header1
+            - AddResponseHeader=user-response, user-response-header1
+        - id: book-service
+          uri: http://127.0.0.1:8082
+          predicates:
+            - Path=/book-service/**
+          filters:
+            - AddRequestHeader=book-request, book-request-header1
+            - AddResponseHeader=book-response, book-response-header1

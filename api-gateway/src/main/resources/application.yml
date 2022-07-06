@@ -19,12 +19,16 @@ spring:
           predicates:
             - Path=/user-service/**
           filters:
-            - AddRequestHeader=user-request, user-request-header1
-            - AddResponseHeader=user-response, user-response-header1
+            - PreCustomFilter
+            - PostCustomFilter
+#            - AddRequestHeader=user-request, user-request-header1
+#            - AddResponseHeader=user-response, user-response-header1
         - id: book-service
           uri: http://127.0.0.1:8082
           predicates:
             - Path=/book-service/**
           filters:
-            - AddRequestHeader=book-request, book-request-header1
-            - AddResponseHeader=book-response, book-response-header1
+            - PreCustomFilter
+            - PostCustomFilter
+#            - AddRequestHeader=book-request, book-request-header1
+#            - AddResponseHeader=book-response, book-response-header1

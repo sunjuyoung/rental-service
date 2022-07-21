@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,13 +19,13 @@ import java.util.List;
 public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
-
+    private final BCryptPasswordEncoder passwordEncoder;
 
 
     public User saveUser(RequestUser requestUser){
         User user = new User();
         user.setEmail(requestUser.getEmail());
-        user.setPassword(requestUser.getPassword());
+        user.setPassword(passwordEncoder.encode(requestUser.getPassword()));
         user.setUsername(requestUser.getUsername());
         user.getRoles().add(Roles.MEMBER);
         return userRepository.save(user);

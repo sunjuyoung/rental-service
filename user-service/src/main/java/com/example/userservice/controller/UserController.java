@@ -1,7 +1,9 @@
 package com.example.userservice.controller;
 
-import com.example.userservice.dto.RequestUser;
-import com.example.userservice.entity.User;
+import com.example.userservice.dto.UserDTO;
+import com.example.userservice.entity.AppUser;
+import com.example.userservice.entity.Role;
+import com.example.userservice.repository.RoleRepository;
 import com.example.userservice.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,12 +16,24 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+    private final RoleRepository roleRepository;
 
     @PostMapping("/user")
-    public ResponseEntity<User> createUser(@RequestBody RequestUser requestUser){
+    public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO userDTO){
+        UserDTO saveUser = userService.saveUser(userDTO);
+        return new ResponseEntity<>(saveUser, HttpStatus.CREATED);
+    }
 
-        User user1 = userService.saveUser(requestUser);
-        return new ResponseEntity<>(user1, HttpStatus.CREATED);
+    @PostMapping("/role")
+    public ResponseEntity<String> createAuthority(@RequestParam String name){
+           userService.saveRole(name);
+        return ResponseEntity.ok().body("Ok");
+    }
+
+    @PutMapping("/role")
+    public ResponseEntity<String> updateAuthority(@RequestBody UserDTO userDTO){
+        userService.updateAuthority(userDTO);
+        return ResponseEntity.ok().body("Ok");
     }
 
 }

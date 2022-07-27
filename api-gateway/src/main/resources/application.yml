@@ -14,15 +14,39 @@ spring:
   cloud:
     gateway:
       routes:
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user-service/login
+            - Method=POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user-service/**
+            - Method=POST
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+
+
         - id : user-service
           uri: lb://USER-SERVICE
           predicates:
             - Path=/user-service/**
+            - Method=GET
           filters:
             - PreCustomFilter
             - PostCustomFilter
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/user-service/(?<segment>.*), /$\{segment}
 #            - AddRequestHeader=user-request, user-request-header1
 #            - AddResponseHeader=user-response, user-response-header1
+
+
         - id: book-service
           uri: lb://BOOK-SERVICE
           predicates:
@@ -30,7 +54,7 @@ spring:
           filters:
             - name: PreCustomFilter
             - name: PostCustomFilter
-            - name: LoggingFilter
+#            - name: LoggingFilter
               args:
                 baseMessage: Hi ,
                 preLogger: true

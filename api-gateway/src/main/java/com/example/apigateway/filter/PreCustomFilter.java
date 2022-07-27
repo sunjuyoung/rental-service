@@ -25,7 +25,7 @@ public class PreCustomFilter extends AbstractGatewayFilterFactory<PreCustomFilte
         //custom pre filter
         return ((exchange, chain) -> {
             ServerHttpRequest request = exchange.getRequest();
-            log.info("CUstom pre filter : request id : {}", request.getId());
+            log.info("Custom pre filter : request id : {}", request.getId());
 
             return chain.filter(exchange.mutate().request(request).build());
         });

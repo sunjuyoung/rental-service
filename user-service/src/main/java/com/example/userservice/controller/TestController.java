@@ -1,9 +1,14 @@
 package com.example.userservice.controller;
 
+import com.example.userservice.auth.AuthUser;
+import com.example.userservice.auth.CurrentUser;
+import com.example.userservice.dto.UserDTO;
+import com.example.userservice.entity.AppUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,7 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 
 @Slf4j
 @RestController
-@RequestMapping("/user-service")
+@RequestMapping("")
 @RequiredArgsConstructor
 public class TestController {
 
@@ -25,10 +30,16 @@ public class TestController {
         return ResponseEntity.ok().body("hello");
     }
 
+    @GetMapping("/")
+    public String index(){
+
+        return "hi";
+    }
     @GetMapping("/welcome")
     public String welcome(){
         return "welcome user-service";
     }
+
     @GetMapping("/check")
     public String customFilterTest(HttpServletRequest request){
        log.info("server port : {}" ,request.getServerPort());

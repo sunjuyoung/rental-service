@@ -10,13 +10,28 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api")
+@RequestMapping("")
 public class UserController {
 
     private final UserService userService;
-    private final RoleRepository roleRepository;
+
+
+    @GetMapping("/user/{nickname}")
+    public ResponseEntity<UserDTO> getUserbyNickname(@PathVariable("nickname")String nickname){
+        UserDTO userDTO  = userService.getUser(nickname);
+        return ResponseEntity.ok().body(userDTO);
+    }
+
+
+    @GetMapping("/allUsers")
+    public ResponseEntity<List<UserDTO>> getAllUsers(){
+        List<UserDTO> userDTOList = userService.getAllUsers();
+        return ResponseEntity.ok().body(userDTOList);
+    }
 
     @PostMapping("/user")
     public ResponseEntity<UserDTO> createUser(@RequestBody UserDTO userDTO){

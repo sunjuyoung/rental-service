@@ -33,7 +33,7 @@ public class UserService implements UserDetailsService {
     public UserDTO saveUser(UserDTO userDTO){
         AppUser user = modelMapper.map(userDTO, AppUser.class);
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
-        Role admin = roleRepository.findByName("Admin");
+        Role admin = roleRepository.findByName("MEMBER");
         Set<Role> authorities = new HashSet<>();
         authorities.add(admin);
         user.setRoles(authorities);
@@ -42,17 +42,21 @@ public class UserService implements UserDetailsService {
     }
 
 
+    @Transactional
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        AppUser user = userRepository.findByNickname(username);
-        if(user == null){
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        AppUser user = Optional.of(userRepository.findByEmail(email))
+                .filter(Optional::isPresent)
+                .map(Optional::get).get();
+
+/*        if(user == null){
             throw new  UsernameNotFoundException("not found user");
-        }
+        }*/
         List<SimpleGrantedAuthority> authorityList = new ArrayList<>();
         for(Role role : user.getRoles()){
             authorityList.add(new SimpleGrantedAuthority(role.getName()));
         }
-        return new User(user.getNickname(),user.getPassword(),true,true,true,true,
+        return new User(user.getEmail(),user.getPassword(),true,true,true,true,
                 authorityList);
 
     }
@@ -74,4 +78,20 @@ public class UserService implements UserDetailsService {
         return modelMapper.map(user,UserDTO.class);
     }
 
+    public UserDTO getUser(String nickname) {
+        AppUser user = userRepository.findByNickname(nickname);
+        if(user == null){
+            throw new UsernameNotFoundException("user not found");
+        }
+        return modelMapper.map(user,UserDTO.class);
+    }
+
+    public List<UserDTO> getAllUsers() {
+        List<AppUser> users = userRepository.findAll();
+        List<UserDTO> userDTOList = new ArrayList<>();
+        users.forEach(user ->{
+            userDTOList.add(modelMapper.map(user,UserDTO.class));
+        });
+        return userDTOList;
+    }
 }

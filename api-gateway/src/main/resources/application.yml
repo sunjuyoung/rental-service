@@ -7,6 +7,8 @@ eureka:
     service-url:
       defaultZone: http://127.0.0.1:8761/eureka
 
+token:
+  secret: user_token
 
 spring:
   application:
@@ -26,12 +28,30 @@ spring:
         - id: user-service
           uri: lb://USER-SERVICE
           predicates:
-            - Path=/user-service/**
+            - Path=/user-service/user
             - Method=POST
           filters:
             - RemoveRequestHeader=Cookie
             - RewritePath=/user-service/(?<segment>.*), /$\{segment}
 
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user-service/**
+            - Method=POST
+          filters:
+            - AuthorizationHeaderFilter
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user-service/swagger-ui/**
+            - Method=GET
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/user-service/(?<segment>.*), /$\{segment}
 
         - id : user-service
           uri: lb://USER-SERVICE
@@ -39,8 +59,9 @@ spring:
             - Path=/user-service/**
             - Method=GET
           filters:
-            - PreCustomFilter
-            - PostCustomFilter
+            - AuthorizationHeaderFilter
+#            - PreCustomFilter
+#            - PostCustomFilter
             - RemoveRequestHeader=Cookie
             - RewritePath=/user-service/(?<segment>.*), /$\{segment}
 #            - AddRequestHeader=user-request, user-request-header1
@@ -61,3 +82,6 @@ spring:
                 postLogger: true
 #            - AddRequestHeader=book-request, book-request-header1
 #            - AddResponseHeader=book-response, book-response-header1
+logging:
+  level:
+    com.example.apigateway: debug

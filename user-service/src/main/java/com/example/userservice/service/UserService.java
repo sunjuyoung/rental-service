@@ -1,5 +1,6 @@
 package com.example.userservice.service;
 
+import com.example.userservice.auth.AuthUser;
 import com.example.userservice.dto.UserDTO;
 import com.example.userservice.entity.Role;
 import com.example.userservice.entity.AppUser;
@@ -7,6 +8,7 @@ import com.example.userservice.repository.RoleRepository;
 import com.example.userservice.repository.UserRepository;
 import com.google.inject.internal.cglib.proxy.$MethodProxy;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -20,7 +22,9 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
 
+@Slf4j
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class UserService implements UserDetailsService {
 
@@ -29,7 +33,6 @@ public class UserService implements UserDetailsService {
     private final ModelMapper modelMapper;
     private final RoleRepository roleRepository;
 
-    @Transactional
     public UserDTO saveUser(UserDTO userDTO){
         AppUser user = modelMapper.map(userDTO, AppUser.class);
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
@@ -42,12 +45,16 @@ public class UserService implements UserDetailsService {
     }
 
 
-    @Transactional
+
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        //AppUser user = getAppUserByEmail(email);
         AppUser user = Optional.of(userRepository.findByEmail(email))
                 .filter(Optional::isPresent)
                 .map(Optional::get).get();
+        log.info("---------=-=-=-=-=-=-=-=-=");
+        log.info(user.getEmail());
+        log.info(user.getNickname());
 
 /*        if(user == null){
             throw new  UsernameNotFoundException("not found user");
@@ -56,8 +63,9 @@ public class UserService implements UserDetailsService {
         for(Role role : user.getRoles()){
             authorityList.add(new SimpleGrantedAuthority(role.getName()));
         }
-        return new User(user.getEmail(),user.getPassword(),true,true,true,true,
-                authorityList);
+        /*return new User(user.getEmail(),user.getPassword(),true,true,true,true,
+                authorityList);*/
+        return new AuthUser(user);
 
     }
 
@@ -67,7 +75,6 @@ public class UserService implements UserDetailsService {
         roleRepository.save(role);
     }
 
-    @Transactional
     public UserDTO updateAuthority(UserDTO userDTO){
         AppUser user = userRepository.findByNickname(userDTO.getNickname());
         Set<Role> authorities =  user.getRoles();
@@ -93,5 +100,20 @@ public class UserService implements UserDetailsService {
             userDTOList.add(modelMapper.map(user,UserDTO.class));
         });
         return userDTOList;
+    }
+
+    public UserDTO getUserDetailsByEmail(String email) {
+       // AppUser appUser = getAppUserByEmail(email);
+        AppUser appUser =Optional.of(userRepository.findByEmail(email))
+                .filter(Optional::isPresent)
+                .map(Optional::get).get();
+
+        return modelMapper.map(appUser,UserDTO.class);
+    }
+
+    private AppUser getAppUserByEmail(String email) {
+        return (AppUser) Optional.of(userRepository.findByEmail(email))
+                .filter(Optional::isPresent)
+                .map(Optional::get).get();
     }
 }

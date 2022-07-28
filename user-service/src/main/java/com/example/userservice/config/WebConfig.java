@@ -4,6 +4,7 @@ import com.example.userservice.security.AuthenticationFilter;
 import com.example.userservice.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -21,6 +22,7 @@ public class WebConfig extends WebSecurityConfigurerAdapter {
 
     private final UserService userService;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
+    private final Environment env;
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
@@ -28,14 +30,16 @@ public class WebConfig extends WebSecurityConfigurerAdapter {
         http.csrf().disable();
         http.cors().disable();
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        http.authorizeRequests().antMatchers("/user-service/login/**","/swagger-ui/**","/login").permitAll();
+      /*  http.authorizeRequests().antMatchers("/welcome").access("hasRole('ADMIN')");
+        http.authorizeRequests().antMatchers("/check").access("hasRole('MEMBER')");*/
+        http.authorizeRequests().antMatchers("/user-service/login/**","/swagger-ui/**","/login","/user-service/swagger-ui/**").permitAll();
         http.authorizeRequests().antMatchers(HttpMethod.POST,"/user-service/user","/login","/user-service/login").permitAll();
         http.authorizeRequests().and().addFilter(getAuthenticationFilter());
     }
 
     private AuthenticationFilter getAuthenticationFilter() throws Exception{
 
-        AuthenticationFilter authenticationFilter = new AuthenticationFilter();
+        AuthenticationFilter authenticationFilter = new AuthenticationFilter(userService,env);
         authenticationFilter.setAuthenticationManager(authenticationManager());
         return authenticationFilter;
     }

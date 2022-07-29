@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -16,6 +17,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import javax.servlet.Filter;
 
 @Configuration
+@EnableGlobalMethodSecurity(securedEnabled = true,prePostEnabled = true)
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class WebConfig extends WebSecurityConfigurerAdapter {
@@ -29,12 +31,17 @@ public class WebConfig extends WebSecurityConfigurerAdapter {
 
         http.csrf().disable();
         http.cors().disable();
-        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+
+       // http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        http.authorizeRequests().mvcMatchers().permitAll();
+        http.authorizeRequests().anyRequest().permitAll()
+                .and()
+                .addFilter(getAuthenticationFilter());
       /*  http.authorizeRequests().antMatchers("/welcome").access("hasRole('ADMIN')");
         http.authorizeRequests().antMatchers("/check").access("hasRole('MEMBER')");*/
-        http.authorizeRequests().antMatchers("/user-service/login/**","/swagger-ui/**","/login","/user-service/swagger-ui/**").permitAll();
-        http.authorizeRequests().antMatchers(HttpMethod.POST,"/user-service/user","/login","/user-service/login").permitAll();
-        http.authorizeRequests().and().addFilter(getAuthenticationFilter());
+       // http.authorizeRequests().antMatchers("/user-service/login/**","/swagger-ui/**","/login","/user-service/swagger-ui/**").permitAll();
+        //http.authorizeRequests().antMatchers(HttpMethod.POST,"/user-service/user","/login","/user-service/login").permitAll();
+
     }
 
     private AuthenticationFilter getAuthenticationFilter() throws Exception{

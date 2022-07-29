@@ -1,17 +1,13 @@
 package com.example.userservice.service;
 
-import com.example.userservice.auth.AuthUser;
+import com.example.userservice.auth.UserAccount;
 import com.example.userservice.dto.UserDTO;
-import com.example.userservice.entity.Role;
 import com.example.userservice.entity.AppUser;
-import com.example.userservice.repository.RoleRepository;
+import com.example.userservice.entity.roles.Roles;
 import com.example.userservice.repository.UserRepository;
-import com.google.inject.internal.cglib.proxy.$MethodProxy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -31,15 +27,13 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
-    private final RoleRepository roleRepository;
 
     public UserDTO saveUser(UserDTO userDTO){
         AppUser user = modelMapper.map(userDTO, AppUser.class);
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
-        Role admin = roleRepository.findByName("MEMBER");
-        Set<Role> authorities = new HashSet<>();
-        authorities.add(admin);
-        user.setRoles(authorities);
+        String TempRole = Roles.TEMPORARY.name();
+        user.setRole(TempRole);
+        user.setToken(UUID.randomUUID().toString());
         AppUser saveUser = userRepository.save(user);
         return modelMapper.map(saveUser,UserDTO.class);
     }
@@ -48,40 +42,28 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        //AppUser user = getAppUserByEmail(email);
-        AppUser user = Optional.of(userRepository.findByEmail(email))
+        AppUser appUser = getAppUserByEmail(email);
+/*        AppUser user = Optional.of(userRepository.findByEmail(email))
                 .filter(Optional::isPresent)
-                .map(Optional::get).get();
-        log.info("---------=-=-=-=-=-=-=-=-=");
-        log.info(user.getEmail());
-        log.info(user.getNickname());
-
+                .map(Optional::get).get();*/
 /*        if(user == null){
             throw new  UsernameNotFoundException("not found user");
         }*/
-        List<SimpleGrantedAuthority> authorityList = new ArrayList<>();
+/*        List<SimpleGrantedAuthority> authorityList = new ArrayList<>();
         for(Role role : user.getRoles()){
             authorityList.add(new SimpleGrantedAuthority(role.getName()));
-        }
-        /*return new User(user.getEmail(),user.getPassword(),true,true,true,true,
-                authorityList);*/
-        return new AuthUser(user);
+        }*/
+    /*  return new User(user.getEmail(),user.getPassword(),true,true,true,true,
+                List.of(new SimpleGrantedAuthority(user.getRole())));*/
 
+       return new UserAccount(appUser);
     }
 
-    public void saveRole(String name){
-        Role role = new Role();
-        role.save(name);
-        roleRepository.save(role);
-    }
+
 
     public UserDTO updateAuthority(UserDTO userDTO){
         AppUser user = userRepository.findByNickname(userDTO.getNickname());
-        Set<Role> authorities =  user.getRoles();
-        authorities.clear();
-        userDTO.getRoles().stream().map(roleRepository::findByName)
-                .forEach(authorities::add);
-        user.setRoles(authorities);
+
         return modelMapper.map(user,UserDTO.class);
     }
 
@@ -104,7 +86,7 @@ public class UserService implements UserDetailsService {
 
     public UserDTO getUserDetailsByEmail(String email) {
        // AppUser appUser = getAppUserByEmail(email);
-        AppUser appUser =Optional.of(userRepository.findByEmail(email))
+        AppUser appUser = Optional.of(userRepository.findByEmail(email))
                 .filter(Optional::isPresent)
                 .map(Optional::get).get();
 

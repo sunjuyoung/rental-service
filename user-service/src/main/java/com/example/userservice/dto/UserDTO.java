@@ -1,12 +1,8 @@
 package com.example.userservice.dto;
 
-import com.example.userservice.entity.Role;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
-import org.hibernate.validator.constraints.Length;
 
-import javax.persistence.Column;
-import javax.persistence.ManyToMany;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.Size;
 import java.util.ArrayList;
@@ -32,7 +28,11 @@ public class UserDTO {
     @Size(min = 4,max = 20)
     private String password;
 
-    private Set<String> roles = new HashSet<>();
+    private String role;
+
+    private String token;
+
+    private String expirationTime;
 
     private List<RentalDTO> rentals = new ArrayList<>();
 

@@ -1,9 +1,6 @@
 package com.example.userservice.controller;
 
 import com.example.userservice.dto.UserDTO;
-import com.example.userservice.entity.AppUser;
-import com.example.userservice.entity.Role;
-import com.example.userservice.repository.RoleRepository;
 import com.example.userservice.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -39,7 +36,7 @@ public class UserController {
         return new ResponseEntity<>(saveUser, HttpStatus.CREATED);
     }
 
-    @PostMapping("/role")
+/*    @PostMapping("/role")
     public ResponseEntity<String> createAuthority(@RequestParam String name){
            userService.saveRole(name);
         return ResponseEntity.ok().body("Ok");
@@ -49,6 +46,6 @@ public class UserController {
     public ResponseEntity<String> updateAuthority(@RequestBody UserDTO userDTO){
         userService.updateAuthority(userDTO);
         return ResponseEntity.ok().body("Ok");
-    }
+    }*/
 
 }

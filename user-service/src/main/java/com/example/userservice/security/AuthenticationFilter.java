@@ -1,7 +1,9 @@
 package com.example.userservice.security;
 
+import com.example.userservice.auth.UserAccount;
 import com.example.userservice.dto.LoginDTO;
 import com.example.userservice.dto.UserDTO;
+import com.example.userservice.entity.AppUser;
 import com.example.userservice.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
@@ -17,6 +19,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.FilterChain;
@@ -26,6 +29,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -40,10 +44,12 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             throws AuthenticationException {
 
         try{
-            LoginDTO creds =  new ObjectMapper().readValue(request.getInputStream(), LoginDTO.class);
+            UserDTO creds =  new ObjectMapper().readValue(request.getInputStream(), UserDTO.class);
 
+            UserDTO userDTO = userService.getUserDetailsByEmail(creds.getEmail());
             return getAuthenticationManager().authenticate(
-                new UsernamePasswordAuthenticationToken(creds.getEmail(), creds.getPassword()));
+                new UsernamePasswordAuthenticationToken(creds.getEmail(),creds.getPassword(),
+                        List.of(new SimpleGrantedAuthority(userDTO.getRole()))));
         }catch (IOException e){
             throw new RuntimeException(e);
         }
@@ -55,18 +61,20 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
         //log.debug(((User)authResult.getPrincipal()).getUsername());
 
-        String email = ((UserDetails)authResult.getPrincipal()).getUsername();
+
+        String email = ((User)authResult.getPrincipal()).getUsername();
         UserDTO userDTO = userService.getUserDetailsByEmail(email);
 
         String token = Jwts.builder()
-                .setSubject(userDTO.getNickname())
-                .claim("roles",userDTO.getRoles().stream().map(SimpleGrantedAuthority::new).collect(Collectors.toList()))
+                .setSubject(userDTO.getEmail())
+
+                .claim("role",userDTO.getRole())
                 .setIssuer(request.getRequestURI().toString())
                 .setExpiration(new Date(System.currentTimeMillis()+Long.parseLong(env.getProperty("token.expiration_time"))))
                 .signWith(SignatureAlgorithm.HS512,env.getProperty("token.secret"))
                 .compact();
-
         response.addHeader("token",token);
-        response.addHeader("userName",userDTO.getNickname());
+        response.addHeader("userName",userDTO.getEmail());
+
     }
 }

@@ -8,6 +8,9 @@ import com.example.userservice.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -56,6 +59,13 @@ public class UserService implements UserDetailsService {
     /*  return new User(user.getEmail(),user.getPassword(),true,true,true,true,
                 List.of(new SimpleGrantedAuthority(user.getRole())));*/
 
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                new UserAccount(appUser),
+                appUser.getPassword(),
+                List.of(new SimpleGrantedAuthority(appUser.getRole()))
+        );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
        return new UserAccount(appUser);
     }
 
@@ -93,7 +103,7 @@ public class UserService implements UserDetailsService {
         return modelMapper.map(appUser,UserDTO.class);
     }
 
-    private AppUser getAppUserByEmail(String email) {
+    public AppUser getAppUserByEmail(String email) {
         return (AppUser) Optional.of(userRepository.findByEmail(email))
                 .filter(Optional::isPresent)
                 .map(Optional::get).get();

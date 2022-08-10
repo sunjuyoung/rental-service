@@ -3,12 +3,12 @@ package com.example.userservice.controller;
 import com.example.userservice.auth.UserAccount;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.User;
 import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,9 +35,9 @@ public class TestController {
         return "hi";
     }
     @GetMapping("/welcome")
-    public String welcome(Principal principal){
-        String name = principal.getName();
-        return "hi"+name;
+    public String welcome( UserAccount userAccount){
+        log.info(userAccount.getUsername());
+        return "hi";
     }
 
     @GetMapping("/check")

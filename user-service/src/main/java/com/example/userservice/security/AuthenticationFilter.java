@@ -11,16 +11,22 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
+import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.AuthorityUtils;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -33,6 +39,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
+@Transactional
 @RequiredArgsConstructor
 public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
@@ -45,11 +52,25 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
         try{
             UserDTO creds =  new ObjectMapper().readValue(request.getInputStream(), UserDTO.class);
+            AppUser appUser = userService.getAppUserByEmail(creds.getEmail());
 
-            UserDTO userDTO = userService.getUserDetailsByEmail(creds.getEmail());
+/*            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+                    new UserAccount(appUser),
+                    appUser.getPassword(),
+                    List.of(new SimpleGrantedAuthority(appUser.getRole()))
+            );
+            SecurityContextHolder.getContext().setAuthentication(authentication);*/
+            //securitycontextholder에 등록해야 인증된 사용자
+            //authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+      /*      SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+            securityContext.setAuthentication(authentication);
+            SecurityContextHolder.setContext(securityContext);*/
+
             return getAuthenticationManager().authenticate(
-                new UsernamePasswordAuthenticationToken(creds.getEmail(),creds.getPassword(),
-                        List.of(new SimpleGrantedAuthority(userDTO.getRole()))));
+                new UsernamePasswordAuthenticationToken(appUser.getEmail(),appUser.getPassword(),
+                        List.of(new SimpleGrantedAuthority(appUser.getRole()))));
+
         }catch (IOException e){
             throw new RuntimeException(e);
         }
@@ -60,7 +81,6 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
                                             Authentication authResult) throws IOException, ServletException {
 
         //log.debug(((User)authResult.getPrincipal()).getUsername());
-
 
         String email = ((User)authResult.getPrincipal()).getUsername();
         UserDTO userDTO = userService.getUserDetailsByEmail(email);

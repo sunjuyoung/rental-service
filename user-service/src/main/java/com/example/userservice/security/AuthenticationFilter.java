@@ -52,7 +52,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
         try{
             UserDTO creds =  new ObjectMapper().readValue(request.getInputStream(), UserDTO.class);
-            AppUser appUser = userService.getAppUserByEmail(creds.getEmail());
+            //AppUser appUser = userService.getAppUserByEmail(creds.getEmail());
 
 /*            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                     new UserAccount(appUser),
@@ -68,8 +68,8 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
             SecurityContextHolder.setContext(securityContext);*/
 
             return getAuthenticationManager().authenticate(
-                new UsernamePasswordAuthenticationToken(appUser.getEmail(),appUser.getPassword(),
-                        List.of(new SimpleGrantedAuthority(appUser.getRole()))));
+                new UsernamePasswordAuthenticationToken(creds.getEmail(),creds.getPassword()
+                      ));
 
         }catch (IOException e){
             throw new RuntimeException(e);

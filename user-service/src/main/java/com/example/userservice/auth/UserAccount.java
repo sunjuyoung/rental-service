@@ -11,15 +11,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-@Getter
-public class UserAccount extends User {
 
-    private AppUser appUser;
+public class UserAccount  {
+
+/*    private AppUser appUser;
 
     public UserAccount(AppUser appUser) {
         super(appUser.getEmail(), appUser.getPassword(), List.of(new SimpleGrantedAuthority(appUser.getRole())));
         this.appUser = appUser;
-    }
+    }*/
 
 
 }

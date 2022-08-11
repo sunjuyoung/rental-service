@@ -11,6 +11,7 @@ import org.modelmapper.ModelMapper;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -45,28 +46,28 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        AppUser appUser = getAppUserByEmail(email);
-/*        AppUser user = Optional.of(userRepository.findByEmail(email))
+        //AppUser appUser = getAppUserByEmail(email);
+        AppUser user = Optional.of(userRepository.findByEmail(email))
                 .filter(Optional::isPresent)
-                .map(Optional::get).get();*/
-/*        if(user == null){
+                .map(Optional::get).orElseThrow();
+  /*      if(user == null){
             throw new  UsernameNotFoundException("not found user");
         }*/
 /*        List<SimpleGrantedAuthority> authorityList = new ArrayList<>();
         for(Role role : user.getRoles()){
             authorityList.add(new SimpleGrantedAuthority(role.getName()));
         }*/
-    /*  return new User(user.getEmail(),user.getPassword(),true,true,true,true,
-                List.of(new SimpleGrantedAuthority(user.getRole())));*/
+      return new User(user.getEmail(),user.getPassword(),true,true,true,true,
+                List.of(new SimpleGrantedAuthority(user.getRole())));
 
-        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+/*        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                 new UserAccount(appUser),
                 appUser.getPassword(),
                 List.of(new SimpleGrantedAuthority(appUser.getRole()))
         );
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-       return new UserAccount(appUser);
+       return new UserAccount(appUser);*/
     }
 
 

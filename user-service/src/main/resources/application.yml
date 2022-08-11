@@ -2,6 +2,9 @@ server:
   port: 8081
 
 spring:
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
   application:
     name: user-service
   datasource:
@@ -9,9 +12,7 @@ spring:
     username: root
     password: rnrdj123
     url: jdbc:mariadb://localhost:3306/user-service
-  mvc:
-    pathmatch:
-      matching-strategy: ant_path_matcher
+
   jpa:
     hibernate:
       ddl-auto: create-drop
@@ -20,16 +21,12 @@ spring:
         format_sql: true
 
     show-sql: true
-    defer-datasource-initialization: true
+    #defer-datasource-initialization: true
 
 eureka:
   instance:
-    #instance-id: ${spring.cloud.client.hostname}:${spring.application.instance_id:${random.value}}
+    instance-id: ${spring.cloud.client.hostname}:${spring.application.instance_id:${random.value}}
     prefer-ip-address: true
-#    ip-address: 211.114.128.103
-#    instance-id: ${eureka.instance.ip-address}
-#    non-secure-port:
-
   client:
     register-with-eureka: true
     fetch-registry: true
@@ -38,6 +35,12 @@ eureka:
 logging:
   level:
     com.example.userservice: debug
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh, health, beans
 
 
 token:

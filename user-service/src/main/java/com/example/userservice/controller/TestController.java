@@ -17,7 +17,7 @@ import java.security.Principal;
 
 @Slf4j
 @RestController
-@RequestMapping("")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class TestController {
 
@@ -35,15 +35,17 @@ public class TestController {
         return "hi";
     }
     @GetMapping("/welcome")
-    public String welcome( UserAccount userAccount){
-        log.info(userAccount.getUsername());
+    public String welcome( ){
+
         return "hi";
     }
 
     @GetMapping("/check")
     public String customFilterTest(HttpServletRequest request){
        log.info("server port : {}" ,request.getServerPort());
-        return String.format("hi user service PORT :  %s", env.getProperty("local.server.port"));
+        return String.format("hi user service PORT :  %s", env.getProperty("local.server.port")
+        + ", token secret = " + env.getProperty("token.secret")
+                + ", tt = " + env.getProperty("test.done"));
     }
 
     @GetMapping("/message")

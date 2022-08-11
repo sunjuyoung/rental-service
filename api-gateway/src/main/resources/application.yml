@@ -11,6 +11,9 @@ token:
   secret: user_token
 
 spring:
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
   application:
     name: api-gateway
   cloud:
@@ -32,7 +35,7 @@ spring:
             - Method=POST
           filters:
             - RemoveRequestHeader=Cookie
-            - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+            - RewritePath=/user-service/(?<segment>.*), /api/$\{segment}
 
         - id: user-service
           uri: lb://USER-SERVICE
@@ -42,13 +45,22 @@ spring:
           filters:
             - AuthorizationHeaderFilter
             - RemoveRequestHeader=Cookie
-            - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+            - RewritePath=/user-service/(?<segment>.*), /api/$\{segment}
 
         - id: user-service
           uri: lb://USER-SERVICE
           predicates:
             - Path=/user-service/swagger-ui/**
             - Method=GET
+          filters:
+            - RemoveRequestHeader=Cookie
+            - RewritePath=/user-service/(?<segment>.*), /api/$\{segment}
+
+        - id: user-service
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/user-service/actuator/**
+            - Method=GET,POST
           filters:
             - RemoveRequestHeader=Cookie
             - RewritePath=/user-service/(?<segment>.*), /$\{segment}
@@ -63,9 +75,9 @@ spring:
 #            - PreCustomFilter
 #            - PostCustomFilter
             - RemoveRequestHeader=Cookie
-            - RewritePath=/user-service/(?<segment>.*), /$\{segment}
+            - RewritePath=/user-service/(?<segment>.*), /api/$\{segment}
 #            - AddRequestHeader=user-request, user-request-header1
-#            - AddResponseHeader=user-response, user-response-header1
+#            - AddResponseHeader=user-response, user-response-header1 /$\{segment}
 
 
         - id: book-service
@@ -85,3 +97,11 @@ spring:
 logging:
   level:
     com.example.apigateway: debug
+
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: refresh, health, beans, httptrace

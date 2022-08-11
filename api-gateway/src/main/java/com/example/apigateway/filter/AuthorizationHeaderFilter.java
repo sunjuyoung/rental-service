@@ -15,7 +15,6 @@ import reactor.core.publisher.Mono;
 
 @Slf4j
 @Component
-
 public class AuthorizationHeaderFilter extends AbstractGatewayFilterFactory<AuthorizationHeaderFilter.Config> {
 
     Environment env;
@@ -29,14 +28,15 @@ public class AuthorizationHeaderFilter extends AbstractGatewayFilterFactory<Auth
     public GatewayFilter apply(Config config) {
         return ((exchange, chain) -> {
             ServerHttpRequest request = exchange.getRequest();
+
             log.info("AuthorizationHeaderFilter : request id : {}", request.getId());
+
             if(!request.getHeaders().containsKey(HttpHeaders.AUTHORIZATION)){
                 return onError(exchange, "no authorization header....", HttpStatus.UNAUTHORIZED);
             }
 
             String authorizationHeader = request.getHeaders().get(HttpHeaders.AUTHORIZATION).get(0);
             log.info("====================================");
-            log.info(request.getBody().toString());
 
 
             String jwt = authorizationHeader.replace("Bearer","");
@@ -45,7 +45,7 @@ public class AuthorizationHeaderFilter extends AbstractGatewayFilterFactory<Auth
                 return onError(exchange, "JWT token is not valid", HttpStatus.UNAUTHORIZED);
             }
 
-            return chain.filter(exchange.mutate().request(request).build());
+            return chain.filter(exchange);
         });
     }
 

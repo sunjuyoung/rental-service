@@ -7,6 +7,11 @@ spring:
       matching-strategy: ant_path_matcher
   application:
     name: user-service
+  rabbitmq:
+    host: 127.0.0.1
+    port: 5672
+    username: guest
+    password: guest
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
     username: root
@@ -40,9 +45,9 @@ management:
   endpoints:
     web:
       exposure:
-        include: refresh, health, beans
+        include: refresh, health, beans, busrefresh
 
 
-token:
-  secret: user_token
-  expiration_time: 43200000
+#token:
+#  secret: user_token
+#  expiration_time: 43200000

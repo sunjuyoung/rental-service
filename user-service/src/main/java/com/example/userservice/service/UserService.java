@@ -1,9 +1,12 @@
 package com.example.userservice.service;
 
 import com.example.userservice.auth.UserAccount;
+import com.example.userservice.config.AppProperties;
 import com.example.userservice.dto.UserDTO;
 import com.example.userservice.entity.AppUser;
 import com.example.userservice.entity.roles.Roles;
+import com.example.userservice.mail.EmailMessage;
+import com.example.userservice.mail.EmailService;
 import com.example.userservice.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +21,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 import java.util.*;
 
@@ -31,6 +36,9 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
+    private final TemplateEngine templateEngine;
+    private final AppProperties appProperties;
+    private final EmailService emailService;
 
     public UserDTO saveUser(UserDTO userDTO){
         AppUser user = modelMapper.map(userDTO, AppUser.class);
@@ -39,9 +47,27 @@ public class UserService implements UserDetailsService {
         user.setRole(TempRole);
         user.setToken(UUID.randomUUID().toString());
         AppUser saveUser = userRepository.save(user);
+        sendSignUpConfirmEmail(saveUser);
         return modelMapper.map(saveUser,UserDTO.class);
     }
 
+    public void sendSignUpConfirmEmail(AppUser appUser) {
+        Context context = new Context();
+        String link = "/check-email-token?token="+appUser.getToken()+"&email="+appUser.getEmail();
+        context.setVariable("link",link);
+        context.setVariable("nickname",appUser.getNickname());
+        context.setVariable("linkName","이메일 인증하기");
+        context.setVariable("message","서비스를 사용하려면 링크를 클릭하세요");
+        context.setVariable("host",appProperties.getHost());
+
+        String message = templateEngine.process("mail/link",context);
+        EmailMessage emailMessage = EmailMessage.builder()
+                .to(appUser.getEmail())
+                .subject("회원 가입 인증")
+                .message(message)
+                .build();
+        emailService.sendEmail(emailMessage);
+    }
 
 
     @Override

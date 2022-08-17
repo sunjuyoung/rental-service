@@ -17,7 +17,7 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: syseoz@gmail.com
-    password: zmhklhpmtxzpcfiy
+    password: '{cipher}AQAyG5R7ablE280fSH1MRJPZjHqu8B6wF6Q8pWfNWUKrIfTtm4VK3t3pLC6YyAeEKDHSO0js/rNm0v+ZXh52Qo5/3dVRVmlS3UQC/skV2Xc89qH5NeYFSxS/Zp8ToOl4vQX2I5YDodShiYErQsQf3hP34YRkss+9VHEuU6FTXNY/+HF9KfPb1Ay91QiNTDt2DZ5X5YNWpKFuoqo/tIzK2P69jUtZZWYMgMIO0gbrYv3/QJTeM5xu5+/Pb3S/rvXi+dHPRBItucO0YAg3W1EMGnsDlofP+p8WVw5EyhCDEJYizz6pgHEC4TsaagqpcI99trcplajxMMiJ2/WAuI2qoFwjwJbQ3frQDltRpMKe98fOAsr+abipEu+jfdBTS+3Br5/GX7NVE5J9OcmY5K9TA4rx'
     properties:
       mail:
         smtp:

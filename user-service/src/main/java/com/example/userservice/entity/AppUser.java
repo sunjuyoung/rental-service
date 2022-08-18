@@ -1,6 +1,7 @@
 package com.example.userservice.entity;
 
 
+import com.example.userservice.entity.roles.Roles;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 
@@ -9,6 +10,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Entity
@@ -38,6 +40,24 @@ public class AppUser implements Serializable {
     private String token;
 
     private LocalDate expirationTime;
+
+    private boolean emailVerified;
+
+    private LocalDateTime joinedAt;
+
+    @Embedded
+    private Address address;
+
+    public void createRoleToken(){
+        this.role = Roles.TEMPORARY.name();
+        this.token = UUID.randomUUID().toString();
+    }
+
+    public void confirmEmailToken() {
+        this.joinedAt = LocalDateTime.now();
+        this.emailVerified = true;
+        this.role = Roles.GUEST.toString();
+    }
 
 
 /*    @ManyToMany

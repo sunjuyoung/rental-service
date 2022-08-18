@@ -36,6 +36,12 @@ public class UserController {
         return new ResponseEntity<>(saveUser, HttpStatus.CREATED);
     }
 
+    @GetMapping("/check-email-token")
+    public ResponseEntity<?> checkEmailToken(String token, String email){
+        UserDTO userDTO = userService.checkEmailToken(token,email);
+        return new ResponseEntity<>(userDTO, HttpStatus.OK);
+    }
+
 /*    @PostMapping("/role")
     public ResponseEntity<String> createAuthority(@RequestParam String name){
            userService.saveRole(name);

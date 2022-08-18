@@ -5,12 +5,14 @@ import com.example.userservice.config.AppProperties;
 import com.example.userservice.dto.UserDTO;
 import com.example.userservice.entity.AppUser;
 import com.example.userservice.entity.roles.Roles;
+import com.example.userservice.event.RegistrationCompleteEvent;
 import com.example.userservice.mail.EmailMessage;
 import com.example.userservice.mail.EmailService;
 import com.example.userservice.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -39,15 +41,15 @@ public class UserService implements UserDetailsService {
     private final TemplateEngine templateEngine;
     private final AppProperties appProperties;
     private final EmailService emailService;
+    private final ApplicationEventPublisher publisher;
 
     public UserDTO saveUser(UserDTO userDTO){
         AppUser user = modelMapper.map(userDTO, AppUser.class);
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
-        String TempRole = Roles.TEMPORARY.name();
-        user.setRole(TempRole);
-        user.setToken(UUID.randomUUID().toString());
+        user.createRoleToken();
         AppUser saveUser = userRepository.save(user);
-        sendSignUpConfirmEmail(saveUser);
+       // sendSignUpConfirmEmail(saveUser);
+        publisher.publishEvent(new RegistrationCompleteEvent(saveUser,"/check-email-token"));
         return modelMapper.map(saveUser,UserDTO.class);
     }
 
@@ -134,5 +136,14 @@ public class UserService implements UserDetailsService {
         return (AppUser) Optional.of(userRepository.findByEmail(email))
                 .filter(Optional::isPresent)
                 .map(Optional::get).get();
+    }
+
+    public UserDTO checkEmailToken(String token, String email) {
+        AppUser appUser = userRepository.findByEmail(email).orElseThrow();
+        if(!token.equals(appUser.getToken())){
+            throw new RuntimeException("wrong token");
+        }
+        appUser.confirmEmailToken();
+        return modelMapper.map(appUser,UserDTO.class);
     }
 }
